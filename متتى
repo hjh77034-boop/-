@@ -1,0 +1,131 @@
+-- سواد | Auto Clicker - طبيعي للكمبيوتر
+-- زر تشغيل وتوقيف
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local LocalPlayer = Players.LocalPlayer
+
+local Enabled = false
+local CPS = 7
+local ToggleKey = Enum.KeyCode.T
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "SawadClicker"
+gui.ResetOnSpawn = false
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 220, 0, 120)
+frame.Position = UDim2.new(0.5, -110, 0, 10)
+frame.BackgroundColor3 = Color3.fromRGB(12,12,12)
+frame.BorderSizePixel = 2
+frame.BorderColor3 = Color3.fromRGB(255,255,255)
+frame.Active = true
+frame.Draggable = true
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundTransparency = 1
+title.Text = "سواد | Auto Clicker"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.Parent = frame
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1,0,0,20)
+status.Position = UDim2.new(0,0,0,30)
+status.BackgroundTransparency = 1
+status.Text = "متوقف"
+status.TextColor3 = Color3.fromRGB(255,60,60)
+status.Font = Enum.Font.GothamBold
+status.TextSize = 14
+status.Parent = frame
+
+-- زر تشغيل
+local onBtn = Instance.new("TextButton")
+onBtn.Size = UDim2.new(0, 95, 0, 35)
+onBtn.Position = UDim2.new(0, 10, 0, 60)
+onBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+onBtn.Text = "تشغيل"
+onBtn.TextColor3 = Color3.new(1,1,1)
+onBtn.Font = Enum.Font.GothamBold
+onBtn.TextSize = 15
+onBtn.Parent = frame
+Instance.new("UICorner", onBtn).CornerRadius = UDim.new(0,8)
+
+-- زر توقيف
+local offBtn = Instance.new("TextButton")
+offBtn.Size = UDim2.new(0, 95, 0, 35)
+offBtn.Position = UDim2.new(0, 115, 0, 60)
+offBtn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+offBtn.Text = "توقيف"
+offBtn.TextColor3 = Color3.new(1,1,1)
+offBtn.Font = Enum.Font.GothamBold
+offBtn.TextSize = 15
+offBtn.Parent = frame
+Instance.new("UICorner", offBtn).CornerRadius = UDim.new(0,8)
+
+local cpsLabel = Instance.new("TextLabel")
+cpsLabel.Size = UDim2.new(1,0,0,20)
+cpsLabel.Position = UDim2.new(0,0,0,98)
+cpsLabel.BackgroundTransparency = 1
+cpsLabel.Text = "CPS: 7 | T تشغيل | + - تغيير السرعة"
+cpsLabel.TextColor3 = Color3.fromRGB(180,180,180)
+cpsLabel.Font = Enum.Font.Gotham
+cpsLabel.TextSize = 12
+cpsLabel.Parent = frame
+
+local function setState(v)
+    Enabled = v
+    if Enabled then
+        status.Text = "شغال - سواد"
+        status.TextColor3 = Color3.fromRGB(0,255,0)
+        frame.BorderColor3 = Color3.fromRGB(0,255,0)
+    else
+        status.Text = "متوقف"
+        status.TextColor3 = Color3.fromRGB(255,60,60)
+        frame.BorderColor3 = Color3.fromRGB(255,255,255)
+    end
+end
+
+onBtn.MouseButton1Click:Connect(function() setState(true) end)
+offBtn.MouseButton1Click:Connect(function() setState(false) end)
+
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == ToggleKey then
+        setState(not Enabled)
+    end
+    if input.KeyCode == Enum.KeyCode.Equals then
+        CPS = math.clamp(CPS + 1, 1, 12)
+        cpsLabel.Text = "CPS: "..CPS.." | T تشغيل | + - تغيير السرعة"
+    end
+    if input.KeyCode == Enum.KeyCode.Minus then
+        CPS = math.clamp(CPS - 1, 1, 12)
+        cpsLabel.Text = "CPS: "..CPS.." | T تشغيل | + - تغيير السرعة"
+    end
+end)
+
+-- كليكر طبيعي
+task.spawn(function()
+    while true do
+        task.wait(0.05)
+        if Enabled then
+            local baseDelay = 1 / CPS
+            local randomDelay = baseDelay + math.random(-20, 20) / 1000
+            pcall(function()
+                local pos = UserInputService:GetMouseLocation()
+                VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, true, game, 0)
+                task.wait(0.03 + math.random(0, 20)/1000)
+                VirtualInputManager:SendMouseButtonEvent(pos.X, pos.Y, 0, false, game, 0)
+            end)
+            task.wait(math.max(randomDelay, 0.05))
+        end
+    end
+end)
+
+print("سواد Clicker Loaded")
